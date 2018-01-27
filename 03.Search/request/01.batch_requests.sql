@@ -9,6 +9,8 @@ AS
 		*
 	FROM
 		performance_counters
+	WHERE
+		measure_date_local >= DATEADD(hh, @range, (DATEADD(mi, @offset, GETUTCDATE())))
 )
 SELECT 
 	T1.measure_date_local,
@@ -27,7 +29,7 @@ SELECT
 	AS measure_cntr_value_sec
 FROM 
 	performance_info T1 WITH(NOLOCK)
-	LEFT JOIN
+	LEFT HASH JOIN
 		performance_info T2 WITH(NOLOCK)
 	ON
 		T2.No = T1.No - 1
@@ -40,8 +42,6 @@ FROM
 		AND
 		T2.instance_name = T1.instance_name
 WHERE
-	T1.measure_date_local >= DATEADD(hh, @range, (DATEADD(mi, @offset, GETUTCDATE())))
-	AND
 	T1.counter_name = 'Batch Requests/sec'
 ORDER BY 
 	T1.measure_date_local ASC

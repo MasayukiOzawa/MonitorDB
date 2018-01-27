@@ -33,4 +33,3 @@ WHERE
 ORDER BY
 	T1.instance_name ASC, 
 	T1.measure_date_local ASC
-

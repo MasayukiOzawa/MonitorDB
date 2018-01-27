@@ -83,9 +83,7 @@ CREATE CLUSTERED INDEX [CIX_scheduler] ON [dbo].[scheduler]
 (
 	[measure_date_local] ASC,
 	[measure_date_utc] ASC,
-	[parent_node_id] ASC,
-	[scheduler_id] ASC,
-	[cpu_id] ASC
+	[server_name] ASC
 )WITH (DATA_COMPRESSION=PAGE)
 
 -- ****************************************

@@ -9,6 +9,8 @@ AS
 		*
 	FROM
 		file_io
+	WHERE
+		measure_date_local >= DATEADD(hh, @range, (DATEADD(mi, @offset, GETUTCDATE())))
 )
 
 SELECT
@@ -41,7 +43,7 @@ SELECT
 	COALESCE(T1.size_on_disk_bytes - T2.size_on_disk_bytes,0) AS measure_size_on_disk_bytes
 FROM
 	file_io_info T1 WITH(NOLOCK)
-	LEFT JOIN
+	LEFT HASH JOIN
 	file_io_info T2 WITH(NOLOCK)
 	ON
 		T2.No = T1.No - 1
@@ -51,8 +53,6 @@ FROM
 		T2.database_name = T1.database_name
 		AND
 		T2.file_id = T1.file_id
-WHERE
-	T1.measure_date_local >= DATEADD(hh, @range, (DATEADD(mi, @offset, GETUTCDATE())))
 ORDER BY 
 	T1.database_name ASC, 
 	T1.file_id ASC,
