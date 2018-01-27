@@ -1,4 +1,5 @@
-DECLARE @offset int = 540;�@-- localtime �p�I�t�Z�b�g
+﻿DECLARE @offset int = 540;		-- localtime 用オフセット
+DECLARE @range int = -1;		-- 直近何時間のデータを取得
 
 WITH file_io_info
 AS
@@ -51,7 +52,7 @@ FROM
 		AND
 		T2.file_id = T1.file_id
 WHERE
-	T1.measure_date_local >= DATEADD(mi, -30, (DATEADD(mi, @offset, GETUTCDATE())))
+	T1.measure_date_local >= DATEADD(hh, @range, (DATEADD(mi, @offset, GETUTCDATE())))
 ORDER BY 
 	T1.database_name ASC, 
 	T1.file_id ASC,

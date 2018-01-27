@@ -1,4 +1,5 @@
-DECLARE @offset int = 540;�@-- localtime �p�I�t�Z�b�g
+﻿DECLARE @offset int = 540;		-- localtime 用オフセット
+DECLARE @range int = -1;		-- 直近何時間のデータを取得
 
 WITH wait_info
 AS
@@ -34,7 +35,7 @@ FROM
 	AND
 	T2.wait_type = T1.wait_type
 WHERE
-	T1.measure_date_local >= DATEADD(mi, -60, (DATEADD(mi, @offset, GETUTCDATE())))
+	T1.measure_date_local >= DATEADD(hh, @range, (DATEADD(mi, @offset, GETUTCDATE())))
 	AND
 	T1.waiting_tasks_count >= 0
 	AND

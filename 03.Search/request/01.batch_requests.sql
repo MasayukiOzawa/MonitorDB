@@ -1,4 +1,5 @@
-DECLARE @offset int = 540;�@-- localtime �p�I�t�Z�b�g
+﻿DECLARE @offset int = 540;		-- localtime 用オフセット
+DECLARE @range int = -1;		-- 直近何時間のデータを取得
 
 WITH performance_info
 AS
@@ -39,7 +40,7 @@ FROM
 		AND
 		T2.instance_name = T1.instance_name
 WHERE
-	T1.measure_date_local >= DATEADD(mi, -30, (DATEADD(mi, @offset, GETUTCDATE())))
+	T1.measure_date_local >= DATEADD(hh, @range, (DATEADD(mi, @offset, GETUTCDATE())))
 	AND
 	T1.counter_name = 'Batch Requests/sec'
 ORDER BY 

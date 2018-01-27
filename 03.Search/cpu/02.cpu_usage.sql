@@ -1,3 +1,6 @@
+﻿DECLARE @offset int = 540;		-- localtime 用オフセット
+DECLARE @range int = -1;		-- 直近何時間のデータを取得
+
 SELECT 
 	T1.measure_date_local,
 	T1.server_name,
@@ -20,7 +23,7 @@ FROM
 	AND
 	T2.counter_name = 'CPU Usage % Base'
 WHERE
-	T1.measure_date_local >= DATEADD(mi, -60, GETDATE())
+	T1.measure_date_local >= DATEADD(hh, @range, (DATEADD(mi, @offset, GETUTCDATE())))
 	AND
 	T1.object_name = 'Resource Pool Stats'
 	AND

@@ -1,4 +1,4 @@
-DECLARE @offset int = 540@-- localtime —pƒIƒtƒZƒbƒg
+ï»¿DECLARE @offset int = 540ã€€-- localtime ç”¨ã‚ªãƒ•ã‚»ãƒƒãƒˆ
 
 -- ****************************************
 -- ** Wait Stats

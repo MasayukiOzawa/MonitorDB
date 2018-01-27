@@ -1,4 +1,4 @@
--- CREATE DATABASE
+﻿-- CREATE DATABASE
 
 USE [master]
 GO

@@ -1,19 +1,44 @@
-SET NOCOUNT ON
+ÔªøSET NOCOUNT ON
 GO
-DECLARE @offset int = 540;Å@-- localtime ópÉIÉtÉZÉbÉg
-DECLARE @delete_target int = -3 -- 3 Éñåé
+DECLARE @offset int = 540;„ÄÄ		-- localtime Áî®„Ç™„Éï„Çª„ÉÉ„Éà
+DECLARE @delete_target int = -3 	-- 3 „É∂Êúà
 
+-- ****************************************
+-- ** Wait Stats
+-- ****************************************
 WHILE ((SELECT COUNT(*) FROM wait_stats WHERE measure_date_local <= DATEADD(mm, @delete_target, (DATEADD(mi, @offset, GETUTCDATE())))) > 0)
 BEGIN
 	DELETE TOP (5000) FROM wait_stats WHERE measure_date_local <= DATEADD(mm, @delete_target, (DATEADD(mi, @offset, GETUTCDATE())))
 END
 
+-- ****************************************
+-- ** Performance Counters
+-- ****************************************
 WHILE ((SELECT COUNT(*) FROM performance_counters WHERE measure_date_local <= DATEADD(mm, @delete_target, (DATEADD(mi, @offset, GETUTCDATE())))) > 0)
 BEGIN
 	DELETE TOP (5000) FROM performance_counters WHERE measure_date_local <= DATEADD(mm, @delete_target, (DATEADD(mi, @offset, GETUTCDATE())))
 END
 
+-- ****************************************
+-- ** Scheduler
+-- ****************************************
 WHILE ((SELECT COUNT(*) FROM scheduler WHERE measure_date_local <= DATEADD(mm, @delete_target, (DATEADD(mi, @offset, GETUTCDATE())))) > 0)
 BEGIN
 	DELETE TOP (5000) FROM scheduler WHERE measure_date_local <= DATEADD(mm, @delete_target, (DATEADD(mi, @offset, GETUTCDATE())))
+END
+
+-- ****************************************
+-- ** Sessio / Connection / Worker / Task
+-- ****************************************
+WHILE ((SELECT COUNT(*) FROM session_connection_worker WHERE measure_date_local <= DATEADD(mm, @delete_target, (DATEADD(mi, @offset, GETUTCDATE())))) > 0)
+BEGIN
+	DELETE TOP (5000) FROM session_connection_worker WHERE measure_date_local <= DATEADD(mm, @delete_target, (DATEADD(mi, @offset, GETUTCDATE())))
+END
+
+-- ****************************************
+-- ** File I/O
+-- ****************************************
+WHILE ((SELECT COUNT(*) FROM file_io WHERE measure_date_local <= DATEADD(mm, @delete_target, (DATEADD(mi, @offset, GETUTCDATE())))) > 0)
+BEGIN
+	DELETE TOP (5000) FROM file_io WHERE measure_date_local <= DATEADD(mm, @delete_target, (DATEADD(mi, @offset, GETUTCDATE())))
 END

@@ -1,4 +1,5 @@
-DECLARE @offset int = 540;�@-- localtime �p�I�t�Z�b�g
+﻿DECLARE @offset int = 540;		-- localtime 用オフセット
+DECLARE @range int = -1;		-- 直近何時間のデータを取得
 
 SELECT 
 	measure_date_local,
@@ -11,6 +12,6 @@ SELECT
 FROM 
 	performance_counters WITH(NOLOCK)
 WHERE
-	measure_date_local >= DATEADD(mi, -30, (DATEADD(mi, @offset, GETUTCDATE())))
+	measure_date_local >= DATEADD(hh, @range, (DATEADD(mi, @offset, GETUTCDATE())))
 	AND
 	counter_name = 'User Connections'
