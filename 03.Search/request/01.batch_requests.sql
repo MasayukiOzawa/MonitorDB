@@ -17,7 +17,13 @@ SELECT
 	T1.object_name,
 	T1.counter_name,
 	T1.cntr_value,
-	COALESCE(T1.cntr_value - T2.cntr_value,0) AS measure_cntr_value
+	COALESCE(T1.cntr_value - T2.cntr_value,0) AS measure_cntr_value,
+	CASE COALESCE(T1.cntr_value - T2.cntr_value,0)
+	WHEN 0 THEN 0
+	ELSE 
+		COALESCE(T1.cntr_value - T2.cntr_value,0) / COALESCE(DATEDIFF(ss, T2.measure_date_local, T1.measure_date_local), 0)
+	END
+	AS measure_cntr_value_sec
 FROM 
 	performance_info T1 WITH(NOLOCK)
 	LEFT JOIN
