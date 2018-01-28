@@ -11,6 +11,11 @@ AS
 		wait_stats
 	WHERE
 		measure_date_local >= DATEADD(hh, @range, (DATEADD(mi, @offset, GETUTCDATE())))
+		AND
+		waiting_tasks_count >= 0
+		AND
+		wait_type IN ('CXPACKET', 'SOS_SCHEDULER_YIELD', 'RESOURCE_GOVERNOR_IDLE') 
+
 )
 SELECT 
 	T1.No,
@@ -36,10 +41,6 @@ FROM
 	T2.server_name = T1.server_name
 	AND
 	T2.wait_type = T1.wait_type
-WHERE
-	T1.waiting_tasks_count >= 0
-	AND
-	T1.wait_type IN ('CXPACKET', 'SOS_SCHEDULER_YIELD', 'RESOURCE_GOVERNOR_IDLE') 
 ORDER BY 
 	T1.wait_type ASC, 
 	T1.measure_date_local ASC

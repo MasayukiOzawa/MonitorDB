@@ -1,7 +1,7 @@
 ﻿SET NOCOUNT ON
 GO
 DECLARE @offset int = 540;　		-- localtime 用オフセット
-DECLARE @delete_target int = -3 	-- 3 ヶ月
+DECLARE @delete_target int = -1 	-- 1 ヶ月
 
 -- ****************************************
 -- ** Wait Stats
