@@ -36,7 +36,7 @@ AS
 				OR
 				wait_type LIKE 'LATCH%'
 				OR
-				wait_type IN ('CXPACKET', 'SOS_SCHEDULER_YIELD', 'RESOURCE_GOVERNOR_IDLE', 'THREADPOOL') 
+				wait_type IN ('CXPACKET', 'CXCONSUMER', 'SOS_SCHEDULER_YIELD', 'RESOURCE_GOVERNOR_IDLE', 'THREADPOOL') 
 			) 
 		GROUP BY
 			measure_date_local,
@@ -66,7 +66,7 @@ FROM(
 ) AS T
 PIVOT(
 	SUM(measure_total_wait_time_ms)
-	FOR wait_type IN([CXPACKET], [SOS_SCHEDULER_YIELD], [RESOURCE_GOVERNOR_IDLE], [THREADPOOL], [PAGE I/O LATCH], [PAGE LATCH (non-I/O)], [LATCH (non-buffer)], [LOCKS])
+	FOR wait_type IN([CXPACKET], [CXCONSUMER], [SOS_SCHEDULER_YIELD], [RESOURCE_GOVERNOR_IDLE], [THREADPOOL], [PAGE I/O LATCH], [PAGE LATCH (non-I/O)], [LATCH (non-buffer)], [LOCKS])
 ) AS PVT
 ORDER BY
 	measure_date_local ASC
