@@ -1,18 +1,17 @@
-﻿DECLARE @offset int = 540;		-- localtime 用オフセット
-DECLARE @range int = -1;		-- 直近何時間のデータを取得
+﻿DECLARE @offset int = 540;		-- localtime 用オフセット (JST)
+DECLARE @range int = -12;		-- 直近 12 時間のデータを取得
 
 WITH wait_info_time
 AS
 (
 	
 	SELECT
-		No,
+		RANK() OVER (PARTITION BY wait_type ORDER BY measure_date_local ASC) AS No,
 		measure_date_local,
 		wait_type,
 		SUM(wait_time_ms) AS total_wait_time_ms
 	FROM(
 		SELECT
-			RANK() OVER (PARTITION BY wait_type ORDER BY measure_date_local ASC) AS No,
 			measure_date_local,
 			CASE 
 				WHEN wait_type LIKE 'LCK%'			THEN 'LOCKS' 
@@ -36,14 +35,13 @@ AS
 				OR
 				wait_type LIKE 'LATCH%'
 				OR
-				wait_type IN ('CXPACKET', 'CXCONSUMER', 'SOS_SCHEDULER_YIELD', 'RESOURCE_GOVERNOR_IDLE', 'THREADPOOL') 
+				wait_type IN ('CXPACKET', 'CXCONSUMER', 'SOS_SCHEDULER_YIELD', 'RESOURCE_GOVERNOR_IDLE', 'IO_QUEUE_LIMIT', 'LOG_RATE_GOVERNOR', 'THREADPOOL', 'WRITELOG', 'ASYNC_NETWORK_IO') 
 			) 
 		GROUP BY
 			measure_date_local,
 			wait_type
 	) AS T
 	GROUP BY
-		No,No,
 		measure_date_local,
 		wait_type
 )
@@ -66,7 +64,8 @@ FROM(
 ) AS T
 PIVOT(
 	SUM(measure_total_wait_time_ms)
-	FOR wait_type IN([CXPACKET], [CXCONSUMER], [SOS_SCHEDULER_YIELD], [RESOURCE_GOVERNOR_IDLE], [THREADPOOL], [PAGE I/O LATCH], [PAGE LATCH (non-I/O)], [LATCH (non-buffer)], [LOCKS])
+	FOR wait_type IN([CXPACKET], [CXCONSUMER], [SOS_SCHEDULER_YIELD], [RESOURCE_GOVERNOR_IDLE], [IO_QUEUE_LIMIT],[LOG_RATE_GOVERNOR], [THREADPOOL], 
+	[PAGE I/O LATCH], [WRITELOG], [PAGE LATCH (non-I/O)], [LATCH (non-buffer)], [LOCKS], [ASYNC_NETWORK_IO])
 ) AS PVT
 ORDER BY
 	measure_date_local ASC

@@ -1,5 +1,5 @@
-﻿DECLARE @offset int = 540;		-- localtime 用オフセット
-DECLARE @range int = -1;		-- 直近何時間のデータを取得
+﻿DECLARE @offset int = 540;		-- localtime 用オフセット (JST)
+DECLARE @range int = -12;		-- 直近 12 時間のデータを取得
 
 WITH performance_info
 AS
@@ -26,7 +26,7 @@ SELECT
 	ELSE 
 		COALESCE(T1.cntr_value - T2.cntr_value,0) / COALESCE(DATEDIFF(ss, T2.measure_date_local, T1.measure_date_local), 0)
 	END
-	AS measure_cntr_value_sec
+	AS measure_batch_request_sec
 FROM 
 	performance_info T1 WITH(NOLOCK)
 	LEFT HASH JOIN

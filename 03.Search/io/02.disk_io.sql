@@ -1,5 +1,5 @@
-﻿DECLARE @offset int = 540;		-- localtime 用オフセット
-DECLARE @range int = -1;		-- 直近何時間のデータを取得
+﻿DECLARE @offset int = 540;		-- localtime 用オフセット (JST)
+DECLARE @range int = -12;		-- 直近 12 時間のデータを取得
 
 WITH performance_info
 AS(
@@ -11,6 +11,8 @@ AS(
 		measure_date_local >= DATEADD(hh, @range, (DATEADD(mi, @offset, GETUTCDATE())))
 		AND
 		object_name = 'Resource Pool Stats'
+		AND
+		instance_name <> 'internal'
 		AND
 		counter_name IN ('Avg Disk Read IO (ms)', 'Avg Disk Write IO (ms)', 'Avg Disk Read IO (ms) Base', 'Avg Disk Write IO (ms) Base',
 		'Disk Read IO/sec', 'Disk Write IO/sec', 'Disk Read Bytes/sec', 'Disk Write Bytes/sec')
@@ -24,7 +26,10 @@ FROM(
 		T1.object_name,
 		T1.counter_name,
 		T1.instance_name,
-		COALESCE(T1.cntr_value,0) / T2.cntr_value AS cntr_value
+		CASE T1.cntr_value
+			WHEN 0 THEN 0
+			ELSE COALESCE(T1.cntr_value,0) / T2.cntr_value 
+		END AS cntr_value
 	FROM
 		performance_info AS T1
 		LEFT JOIN
