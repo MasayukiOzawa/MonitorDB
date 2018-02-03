@@ -1,10 +1,10 @@
-﻿DECLARE @offset int = 540　-- localtime 用オフセット
+DECLARE @offset int = 540
 DECLARE @datetime datetime = (SELECT GETUTCDATE())
 
 -- ****************************************
 -- ** Wait Stats
 -- ****************************************
-INSERT INTO wait_stats 
+
 SELECT 
 	DATEADD(mi, @offset, @datetime) AS measure_date_local, 
 	@datetime AS measure_date_utc, 
@@ -22,14 +22,13 @@ WHERE
 -- ****************************************
 -- ** Performance Counters
 -- ****************************************
-INSERT INTO performance_counters 
 SELECT 
 	DATEADD(mi, @offset, @datetime) AS measure_date_local, 
 	@datetime AS measure_date_utc, 
 	@@SERVERNAME AS server_name, 
 	SUBSTRING(object_name, PATINDEX('%:%', object_name) + 1, LEN(object_name)) AS object_name, 
 	counter_name, instance_name, 
-	cntr_value,cntr_type
+	cntr_value,cntr_type 
 FROM 
 	sys.dm_os_performance_counters
 WHERE
@@ -52,7 +51,6 @@ WHERE
 -- ****************************************
 -- ** Scheduler
 -- ****************************************
-INSERT INTO scheduler
 SELECT 
 	DATEADD(mi, @offset, @datetime) AS measure_date_local, 
 	@datetime AS measure_date_utc, 
@@ -94,7 +92,6 @@ WHERE
 -- ****************************************
 -- ** Sessio / Connection / Worker
 -- ****************************************
-INSERT INTO session_connection_worker
 SELECT
 	DATEADD(mi, @offset, @datetime) AS measure_date_local, 
 	@datetime AS measure_date_utc, 
@@ -117,7 +114,6 @@ SELECT
 -- ****************************************
 -- ** File I/O
 -- ****************************************
-INSERT INTO file_io
 SELECT
 	DATEADD(mi, @offset, @datetime) AS measure_date_local, 
 	@datetime AS measure_date_utc, 
