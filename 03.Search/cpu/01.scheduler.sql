@@ -39,4 +39,5 @@ FROM
 		AND
 		T2.No = T1.No - 1
 ORDER BY
+	T1.server_name ASC,
 	T1.measure_date_local ASC

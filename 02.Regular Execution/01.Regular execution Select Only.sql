@@ -1,13 +1,13 @@
-DECLARE @offset int = 540
-DECLARE @datetime datetime = (SELECT GETUTCDATE())
+DECLARE @offset int = 540	-- localtime 用オフセット
+-- DECLARE @datetime datetime = (SELECT GETUTCDATE())
 
 -- ****************************************
 -- ** Wait Stats
 -- ****************************************
 
 SELECT 
-	DATEADD(mi, @offset, @datetime) AS measure_date_local, 
-	@datetime AS measure_date_utc, 
+	DATEADD(mi, @offset, GETUTCDATE()) AS measure_date_local, 
+	GETUTCDATE() AS measure_date_utc, 
 	@@SERVERNAME AS server_name, 
 	wait_type,
 	waiting_tasks_count,
@@ -23,8 +23,8 @@ WHERE
 -- ** Performance Counters
 -- ****************************************
 SELECT 
-	DATEADD(mi, @offset, @datetime) AS measure_date_local, 
-	@datetime AS measure_date_utc, 
+	DATEADD(mi, @offset, GETUTCDATE()) AS measure_date_local, 
+	GETUTCDATE() AS measure_date_utc, 
 	@@SERVERNAME AS server_name, 
 	SUBSTRING(object_name, PATINDEX('%:%', object_name) + 1, LEN(object_name)) AS object_name, 
 	counter_name, instance_name, 
@@ -52,8 +52,8 @@ WHERE
 -- ** Scheduler
 -- ****************************************
 SELECT 
-	DATEADD(mi, @offset, @datetime) AS measure_date_local, 
-	@datetime AS measure_date_utc, 
+	DATEADD(mi, @offset, GETUTCDATE()) AS measure_date_local, 
+	GETUTCDATE() AS measure_date_utc, 
 	@@SERVERNAME AS server_name, 
 	scheduler_address,
 	parent_node_id,
@@ -93,8 +93,8 @@ WHERE
 -- ** Sessio / Connection / Worker
 -- ****************************************
 SELECT
-	DATEADD(mi, @offset, @datetime) AS measure_date_local, 
-	@datetime AS measure_date_utc, 
+	DATEADD(mi, @offset, GETUTCDATE()) AS measure_date_local, 
+	GETUTCDATE() AS measure_date_utc, 
 	@@SERVERNAME AS server_name, 
 	(SELECT COUNT_BIG(*) FROM sys.dm_exec_sessions) AS total_sessions,
 	(SELECT COUNT_BIG(*) FROM sys.dm_exec_connections) AS total_connections,
@@ -115,8 +115,8 @@ SELECT
 -- ** File I/O
 -- ****************************************
 SELECT
-	DATEADD(mi, @offset, @datetime) AS measure_date_local, 
-	@datetime AS measure_date_utc, 
+	DATEADD(mi, @offset, GETUTCDATE()) AS measure_date_local, 
+	GETUTCDATE() AS measure_date_utc, 
 	@@SERVERNAME AS server_name, 
 	DB_NAME(database_id) AS database_name,
 	file_id,
