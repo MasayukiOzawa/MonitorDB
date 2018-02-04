@@ -1,5 +1,5 @@
 ﻿DECLARE @offset int = 540;		-- localtime 用オフセット (JST)
-DECLARE @range int = -12;		-- 直近 12 時間のデータを取得
+DECLARE @range int = -6;		-- 直近 6 時間のデータを取得
 
 WITH wait_info
 AS
@@ -23,7 +23,7 @@ SELECT
 	T1.measure_date_utc,
 	COALESCE(DATEDIFF(ss, T2.measure_date_local, T1.measure_date_local), 0) AS time_diff_sec,
 	T1.server_name,
-	T1.wait_type,
+	RTRIM(T1.wait_type) wait_type,
 	T1.waiting_tasks_count,
 	COALESCE(T1.waiting_tasks_count - T2.waiting_tasks_count,0) As measure_waiting_tasks_count,
 	T1.wait_time_ms,

@@ -4,7 +4,7 @@ DECLARE @range int = -12;		-- 直近 12 時間のデータを取得
 WITH scheduler_info
 AS(
 	SELECT
-		RANK() OVER (PARTITION BY server_name ORDER BY measure_date_local ASC) AS No,
+		ROW_NUMBER() OVER (PARTITION BY server_name ORDER BY measure_date_local ASC) AS No,
 		measure_date_local,
 		measure_date_utc,
 		server_name,

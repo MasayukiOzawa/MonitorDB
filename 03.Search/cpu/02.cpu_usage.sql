@@ -6,9 +6,9 @@ AS(
 SELECT
 	measure_date_local,
 	server_name,
-	object_name,
-	instance_name,
-	counter_name,
+	RTRIM(object_name) AS object_name,
+	RTRIM(instance_name) AS instance_name,
+	RTRIM(counter_name) AS counter_name,
 	cntr_value
 FROM
 	performance_counters
@@ -50,5 +50,3 @@ FROM
 	T2.instance_name = T1.instance_name
 WHERE
 	T1.counter_name IN ('CPU Usage %', 'CPU effective %', 'CPU delayed %')
-ORDER BY
-	T1.measure_date_local ASC

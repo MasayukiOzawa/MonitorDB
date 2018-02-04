@@ -5,7 +5,7 @@ WITH file_io_info
 AS
 (
 	SELECT
-		RANK() OVER (PARTITION BY database_name, file_id ORDER BY measure_date_local ASC) AS No,
+		ROW_NUMBER() OVER (PARTITION BY database_name, file_id ORDER BY measure_date_local ASC) AS No,
 		*
 	FROM
 		file_io
@@ -43,7 +43,7 @@ SELECT
 	COALESCE(T1.size_on_disk_bytes - T2.size_on_disk_bytes,0) AS measure_size_on_disk_bytes
 FROM
 	file_io_info T1 WITH(NOLOCK)
-	LEFT HASH JOIN
+	LEFT JOIN
 	file_io_info T2 WITH(NOLOCK)
 	ON
 		T2.No = T1.No - 1
@@ -53,7 +53,9 @@ FROM
 		T2.database_name = T1.database_name
 		AND
 		T2.file_id = T1.file_id
+/*
 ORDER BY 
 	T1.database_name ASC, 
 	T1.file_id ASC,
 	T1.measure_date_local ASC
+*/

@@ -1,11 +1,11 @@
 ﻿DECLARE @offset int = 540;		-- localtime 用オフセット (JST)
-DECLARE @range int = -12;		-- 直近 12 時間のデータを取得
+DECLARE @range int = -6;		-- 直近 12 時間のデータを取得
 
 WITH performance_info
 AS
 (
 	SELECT
-		RANK() OVER (PARTITION BY object_name, counter_name, instance_name ORDER BY measure_date_local ASC) AS No,
+		ROW_NUMBER() OVER (PARTITION BY object_name, counter_name, instance_name ORDER BY measure_date_local ASC) AS No,
 		*
 	FROM
 		performance_counters
@@ -17,8 +17,8 @@ SELECT
 	T1.measure_date_utc,
 	COALESCE(DATEDIFF(ss, T2.measure_date_local, T1.measure_date_local), 0) AS time_diff_sec,
 	T1.server_name,
-	T1.object_name,
-	T1.counter_name,
+	RTRIM(T1.object_name) object_name,
+	RTRIM(T1.counter_name) counter_name,
 	T1.cntr_value,
 	COALESCE(T1.cntr_value - T2.cntr_value,0) AS measure_cntr_value,
 	CASE COALESCE(T1.cntr_value - T2.cntr_value,0)

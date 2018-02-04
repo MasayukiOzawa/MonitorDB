@@ -1,5 +1,5 @@
 ﻿DECLARE @offset int = 540;		-- localtime 用オフセット (JST)
-DECLARE @range int = -12;		-- 直近 12 時間のデータを取得
+DECLARE @range int = -6;		-- 直近 6 時間のデータを取得
 
 SELECT
 	*
@@ -13,7 +13,7 @@ FROM(
 		CASE WHEN 
 			T1.object_name = 'Buffer Manager' THEN 'Buffer Manager'
 		ELSE
-			T1.instance_name
+			RTRIM(T1.instance_name)
 		END AS instance_name,
 		CASE T1.cntr_value 
 			WHEN 0 THEN 0

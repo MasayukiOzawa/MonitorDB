@@ -5,9 +5,9 @@ SELECT
 	measure_date_local,
 	measure_date_utc,
 	server_name,
-	object_name,
-	counter_name,
-	instance_name,
+	RTRIM(object_name) AS object_name,
+	RTRIM(counter_name) AS counter_name,
+	RTRIM(instance_name) AS instance_name,
 	cntr_value
 FROM 
 	performance_counters WITH(NOLOCK)

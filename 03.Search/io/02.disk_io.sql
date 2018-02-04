@@ -1,5 +1,5 @@
 ﻿DECLARE @offset int = 540;		-- localtime 用オフセット (JST)
-DECLARE @range int = -12;		-- 直近 12 時間のデータを取得
+DECLARE @range int = -6;		-- 直近 12 時間のデータを取得
 
 WITH performance_info
 AS(
@@ -63,6 +63,3 @@ PIVOT(
 	AVG(cntr_value)
 	FOR counter_name IN([Avg Disk Read IO (ms)],[Avg Disk Write IO (ms)],[Disk Read Bytes/sec],[Disk Read IO/sec],[Disk Write Bytes/sec],[Disk Write IO/sec])
 ) AS PVT
-ORDER BY
-	instance_name ASC,
-	measure_date_local ASC

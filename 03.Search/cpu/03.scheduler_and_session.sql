@@ -38,4 +38,5 @@ LEFT JOIN
 	AND
 	T2.server_name = T.server_name
 ORDER BY
+	T.server_name ASC,
 	T.measure_date_local ASC
