@@ -1,5 +1,5 @@
 ﻿DECLARE @offset int = 540;		-- localtime 用オフセット (JST)
-DECLARE @range int = -12;		-- 直近 12 時間のデータを取得
+DECLARE @range int = -48;		-- 直近 12 時間のデータを取得
 
 SELECT
 	T.*,
@@ -34,7 +34,7 @@ FROM(
 LEFT JOIN
 	session_connection_worker AS T2 WITH (NOLOCK)
 	ON
-	T2.measure_date_local = T.measure_date_local
+	T2.measure_date_local BETWEEN DATEADD(ss,- 5,T.measure_date_local) AND DATEADD(ss, 5,T.measure_date_local) 
 	AND
 	T2.server_name = T.server_name
 ORDER BY
