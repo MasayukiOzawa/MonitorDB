@@ -8,7 +8,7 @@ DECLARE @offset int = 540	-- localtime 用オフセット
 SELECT 
 	DATEADD(mi, @offset, GETUTCDATE()) AS measure_date_local, 
 	GETUTCDATE() AS measure_date_utc, 
-	@@SERVERNAME AS server_name, 
+	@@SERVERNAME + ':' + DB_NAME() AS server_name, 
 	wait_type,
 	waiting_tasks_count,
 	wait_time_ms,
@@ -25,7 +25,7 @@ WHERE
 SELECT 
 	DATEADD(mi, @offset, GETUTCDATE()) AS measure_date_local, 
 	GETUTCDATE() AS measure_date_utc, 
-	@@SERVERNAME AS server_name, 
+	@@SERVERNAME + ':' + DB_NAME() AS server_name, 
 	SUBSTRING(object_name, PATINDEX('%:%', object_name) + 1, LEN(object_name)) AS object_name, 
 	counter_name, instance_name, 
 	cntr_value,cntr_type 
@@ -54,7 +54,7 @@ WHERE
 SELECT 
 	DATEADD(mi, @offset, GETUTCDATE()) AS measure_date_local, 
 	GETUTCDATE() AS measure_date_utc, 
-	@@SERVERNAME AS server_name, 
+	@@SERVERNAME + ':' + DB_NAME() AS server_name,
 	scheduler_address,
 	parent_node_id,
 	scheduler_id,
@@ -95,7 +95,7 @@ WHERE
 SELECT
 	DATEADD(mi, @offset, GETUTCDATE()) AS measure_date_local, 
 	GETUTCDATE() AS measure_date_utc, 
-	@@SERVERNAME AS server_name, 
+	@@SERVERNAME + ':' + DB_NAME() AS server_name, 
 	(SELECT COUNT_BIG(*) FROM sys.dm_exec_sessions) AS total_sessions,
 	(SELECT COUNT_BIG(*) FROM sys.dm_exec_connections) AS total_connections,
 	(SELECT COUNT_BIG(*) FROM sys.dm_os_workers) AS total_workers,
@@ -117,7 +117,7 @@ SELECT
 SELECT
 	DATEADD(mi, @offset, GETUTCDATE()) AS measure_date_local, 
 	GETUTCDATE() AS measure_date_utc, 
-	@@SERVERNAME AS server_name, 
+	@@SERVERNAME + ':' + DB_NAME() AS server_name,
 	DB_NAME(database_id) AS database_name,
 	file_id,
 	num_of_reads,
