@@ -90,7 +90,7 @@ WHERE
 	scheduler_id < 1048576
 
 -- ****************************************
--- ** Sessio / Connection / Worker
+-- ** Session / Connection / Worker
 -- ****************************************
 SELECT
 	DATEADD(mi, @offset, GETUTCDATE()) AS measure_date_local, 
