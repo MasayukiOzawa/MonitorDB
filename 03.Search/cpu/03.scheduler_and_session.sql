@@ -13,6 +13,7 @@ FROM(
 		T1.measure_date_local,
 		T1.measure_date_utc,
 		T1.server_name,
+		T1.parent_node_id,
 		COUNT(*) AS core_count,
 		SUM(current_tasks_count) AS total_current_tasks_count,
 		SUM(runnable_tasks_count) AS total_runnable_tasks_count,
@@ -29,6 +30,7 @@ FROM(
 	GROUP BY
 		T1.measure_date_local,
 		T1.measure_date_utc,
+		T1.parent_node_id,
 		T1.server_name
 ) AS T
 LEFT JOIN

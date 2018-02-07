@@ -11,6 +11,8 @@ AS
 		performance_counters
 	WHERE
 		measure_date_local >= DATEADD(hh, @range, (DATEADD(mi, @offset, GETUTCDATE())))
+		AND
+		counter_name = 'Batch Requests/sec'
 )
 SELECT 
 	T1.measure_date_local,
@@ -41,7 +43,5 @@ FROM
 		T2.object_name = T1.object_name
 		AND
 		T2.instance_name = T1.instance_name
-WHERE
-	T1.counter_name = 'Batch Requests/sec'
 ORDER BY 
 	T1.measure_date_local ASC

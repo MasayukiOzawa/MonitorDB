@@ -23,16 +23,32 @@ SELECT
 	T1.file_id,
 	T1.num_of_reads,
 	COALESCE(T1.num_of_reads - T2.num_of_reads,0) AS measure_num_of_reads,
+	CASE 
+		WHEN COALESCE(T1.num_of_reads - T2.num_of_reads,0) = 0 THEN 0
+		ELSE COALESCE(T1.num_of_reads - T2.num_of_reads,0) / COALESCE(DATEDIFF(ss, T2.measure_date_local, T1.measure_date_local), 0) 
+	END AS measure_num_of_reads_sec,
 	T1.num_of_bytes_read,
 	COALESCE(T1.num_of_bytes_read - T2.num_of_bytes_read,0) AS measure_num_of_bytes_read,
+	CASE
+		WHEN COALESCE(T1.num_of_bytes_read - T2.num_of_bytes_read,0) = 0 THEN 0
+		ELSE COALESCE(T1.num_of_bytes_read - T2.num_of_bytes_read,0) / COALESCE(DATEDIFF(ss, T2.measure_date_local, T1.measure_date_local), 0) 
+	END AS measure_num_of_bytes_read_sec,
 	T1.io_stall_read_ms,
 	COALESCE(T1.io_stall_read_ms - T2.io_stall_read_ms,0) AS measure_io_stall_read_ms,
 	T1.io_stall_queued_read_ms,
 	COALESCE(T1.io_stall_queued_read_ms - T2.io_stall_queued_read_ms,0) AS measure_io_stall_queued_read_ms,
 	T1.num_of_writes,
 	COALESCE(T1.num_of_writes - T2.num_of_writes,0) AS measure_num_of_writes,
+	CASE
+		WHEN COALESCE(T1.num_of_writes - T2.num_of_writes,0) = 0 THEN 0
+		ELSE COALESCE(T1.num_of_writes - T2.num_of_writes,0) / COALESCE(DATEDIFF(ss, T2.measure_date_local, T1.measure_date_local), 0) 
+	END AS measure_num_of_writes_sec,
 	T1.num_of_bytes_written,
 	COALESCE(T1.num_of_bytes_written - T2.num_of_bytes_written,0) AS measure_num_of_bytes_written,
+	CASE
+		WHEN COALESCE(T1.num_of_bytes_written - T2.num_of_bytes_written,0) = 0 THEN 0
+		ELSE COALESCE(T1.num_of_bytes_written - T2.num_of_bytes_written,0) / COALESCE(DATEDIFF(ss, T2.measure_date_local, T1.measure_date_local), 0) 
+	END AS measure_num_of_bytes_written_sec,
 	T1.io_stall_write_ms,
 	COALESCE(T1.io_stall_write_ms - T2.io_stall_write_ms,0) AS measure_io_stall_write_ms,
 	T1.io_stall_queued_write_ms,

@@ -40,7 +40,7 @@ $Fields = @()
 foreach($Row in $DataSet.Tables[0].Rows){
     $Fields += @{
         title=("{0}" -f $Row.object_name)
-        value=("*{0}* `nrow_count : {1:#,##0}`nreserved_page_size_KB : {2:#,##0}`nused_page_size_KB : {4:#,##0}`n avg_row_size_bytes: {4:#,##0}" -f $Row.index_name, $Row.row_count, $Row.reserved_page_size_KB, $Row.used_page_size_KB, $Row.avg_row_size_bytes)
+        value=("*{0}* `nrow_count : {1:#,##0}`nreserved_page_size_KB : {2:#,##0}`nused_page_size_KB : {3:#,##0}`n avg_row_size_bytes: {4:#,##0}`n========" -f $Row.index_name, $Row.row_count, $Row.reserved_page_size_KB, $Row.used_page_size_KB, $Row.avg_row_size_bytes)
         short="true"
 
     }
