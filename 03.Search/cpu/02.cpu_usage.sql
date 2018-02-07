@@ -27,31 +27,49 @@ WHERE
 		'CPU Usage % base', 'CPU effective % base', 'CPU delayed % base'
 	)
 	AND
-	instance_name <> 'internal'
+	instance_name NOT IN(
+		'internal',
+		'InMemBackupRestorePool',
+		'InMemDmvCollectorPool',
+		'InMemMetricsDownloaderPool',
+		'InMemDTAPool',
+		'InMemQueryStorePool',
+		'InMemWIAutoTuningPool',
+		'SloHkPool',
+		'PVSCleanerPool'
+	)
 )
 
-SELECT 
-	T1.measure_date_local,
-	T1.server_name,
-	T1.object_name,
-	T1.instance_name,
-	T1.counter_name,
-	CAST((T1.cntr_value * 1.0 / T2.cntr_value) * 100 AS numeric(10, 2)) AS cpu_usage
-FROM 
-	performance_info T1 WITH(NOLOCK)
-	LEFT JOIN
-	performance_info T2 WITH(NOLOCK)
-	ON
-	T2.measure_date_local = T1.measure_date_local
-	AND
-	T2.server_name = T1.server_name
-	AND
-	T2.object_name = T1.object_name
-	AND
-	T2.counter_name IN ('CPU Usage % base', 'CPU effective % base', 'CPU delayed % base')
-	AND
-	T2.counter_name = RTRIM(T1.counter_name) + ' base'
-	AND
-	T2.instance_name = T1.instance_name
-WHERE
-	T1.counter_name IN ('CPU Usage %', 'CPU effective %', 'CPU delayed %')
+SELECT
+	*
+FROM(
+	SELECT 
+		T1.measure_date_local,
+		T1.server_name,
+		T1.object_name,
+		T1.instance_name,
+		T1.counter_name,
+		CAST((T1.cntr_value * 1.0 / T2.cntr_value) * 100 AS numeric(10, 2)) AS cpu_usage
+	FROM 
+		performance_info T1 WITH(NOLOCK)
+		LEFT JOIN
+		performance_info T2 WITH(NOLOCK)
+		ON
+		T2.measure_date_local = T1.measure_date_local
+		AND
+		T2.server_name = T1.server_name
+		AND
+		T2.object_name = T1.object_name
+		AND
+		T2.counter_name IN ('CPU Usage % base', 'CPU effective % base', 'CPU delayed % base')
+		AND
+		T2.counter_name = RTRIM(T1.counter_name) + ' base'
+		AND
+		T2.instance_name = T1.instance_name
+	WHERE
+		T1.counter_name IN ('CPU Usage %', 'CPU effective %', 'CPU delayed %')
+) AS T
+PIVOT(
+	SUM(cpu_usage)
+	FOR counter_name IN([CPU usage %], [CPU delayed %], [CPU effective %])
+)AS PVT
