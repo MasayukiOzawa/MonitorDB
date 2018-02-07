@@ -1,5 +1,5 @@
 ﻿SELECT
-	OBJECT_NAME(p.object_id) as objbect_name,
+	OBJECT_NAME(p.object_id) as object_name,
 	i.name AS index_name,
 	SUM(p.row_count) AS row_count,
 	SUM(p.reserved_page_count) * 8 AS reserved_page_size_KB,
