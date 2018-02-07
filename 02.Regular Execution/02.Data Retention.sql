@@ -1,7 +1,7 @@
 ﻿SET NOCOUNT ON
 GO
 DECLARE @offset int = 540;　		-- localtime 用オフセット
-DECLARE @delete_target int = -1 	-- 何日前のデータを削除するか
+DECLARE @delete_target int = -7 	-- 何日前のデータを削除するか
 DECLARE @delete_size int = 40000     -- 1 処理の削除レコード数
 DECLARE @cnt int = 0
 DECLARE @success_cnt bigint = 0

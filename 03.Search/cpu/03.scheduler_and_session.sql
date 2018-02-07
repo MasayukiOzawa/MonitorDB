@@ -1,5 +1,5 @@
 ﻿DECLARE @offset int = 540;		-- localtime 用オフセット (JST)
-DECLARE @range int = -48;		-- 直近 12 時間のデータを取得
+DECLARE @range int = -12;		-- 直近 12 時間のデータを取得
 
 SELECT
 	T.*,

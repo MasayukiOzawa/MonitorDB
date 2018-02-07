@@ -4,8 +4,17 @@ Param(
     [String]$TargetDB = $ENV:SQLAZURECONNSTR_DestinationDB
 )
 
-# SQL の取得 (BOM 無し UTF-8)
 $sql = (Invoke-WebRequest -Uri "https://raw.githubusercontent.com/MasayukiOzawa/MonitorDB/master/02.Regular%20Execution/01.Regular%20execution%20Select%20Only.sql" -UseBasicParsing).Content
+
+# https://github.com/PowerShell/PowerShell/issues/5007
+# http://robertwesterlund.net/post/2014/12/27/removing-utf8-bom-using-powershell
+[byte[]]$UTF8BOM = 0xEF, 0xBB, 0xBF
+
+# BOM 付きの場合、クエリ実行時にエラーとなるため、BOM を取り除く
+if((Compare-Object $UTF8BOM ([System.Text.Encoding]::UTF8.GetBytes($sql))[0..2] -PassThru) -eq $null){
+    [byte[]]$bytes = ([System.Text.Encoding]::UTF8.GetBytes($sql))[3..([System.Text.Encoding]::UTF8.GetByteCount($sql))]
+    $sql = [System.Text.Encoding]::UTF8.GetString($bytes)
+}
 
 # モニタリング対象から情報を取得
 $SourceConnection = New-Object System.Data.SqlClient.SqlConnection

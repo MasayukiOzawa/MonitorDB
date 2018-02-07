@@ -38,6 +38,7 @@ WHERE
 		'Resource Pool Stats',
 		'General Statistics', 
 		'Buffer Manager', 
+		'Batch Resp Statistics',
 		'Access Methods',
 		'Databases',
 		'Locks',

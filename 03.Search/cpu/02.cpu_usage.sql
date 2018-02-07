@@ -1,4 +1,9 @@
-﻿DECLARE @offset int = 540;		-- localtime 用オフセット (JST)
+﻿/*
+Memo : 
+現状のクエリは、S1 以上でないと実行時間に難あり。
+*/
+
+DECLARE @offset int = 540;		-- localtime 用オフセット (JST)
 DECLARE @range int = -12;		-- 直近 12 時間のデータを取得
 
 WITH performance_info

@@ -6,7 +6,7 @@ AS
 (
 	
 	SELECT
-		ROW_NUMBER() OVER (PARTITION BY wait_type ORDER BY measure_date_local ASC) AS No,
+		ROW_NUMBER() OVER (PARTITION BY server_name, wait_type ORDER BY measure_date_local ASC) AS No,
 		measure_date_local,
 		server_name,
 		RTRIM(wait_type) AS wait_type,

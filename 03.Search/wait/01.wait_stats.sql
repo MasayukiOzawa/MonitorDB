@@ -1,11 +1,11 @@
 ﻿DECLARE @offset int = 540;		-- localtime 用オフセット (JST)
-DECLARE @range int = -6;		-- 直近 6 時間のデータを取得
+DECLARE @range int = -12;		-- 直近 6 時間のデータを取得
 
 WITH wait_info
 AS
 (
 	SELECT
-		RANK() OVER (PARTITION BY wait_type ORDER BY measure_date_local ASC) AS No,
+		RANK() OVER (PARTITION BY server_name, wait_type ORDER BY measure_date_local ASC) AS No,
 		*
 	FROM
 		wait_stats

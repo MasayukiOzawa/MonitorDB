@@ -1,11 +1,11 @@
 ﻿DECLARE @offset int = 540;		-- localtime 用オフセット (JST)
-DECLARE @range int = -6;		-- 直近 12 時間のデータを取得
+DECLARE @range int = -12;		-- 直近 12 時間のデータを取得
 
 WITH performance_info
 AS
 (
 	SELECT
-		ROW_NUMBER() OVER (PARTITION BY object_name, counter_name, instance_name ORDER BY measure_date_local ASC) AS No,
+		ROW_NUMBER() OVER (PARTITION BY server_name, object_name, counter_name, instance_name ORDER BY measure_date_local ASC) AS No,
 		*
 	FROM
 		performance_counters

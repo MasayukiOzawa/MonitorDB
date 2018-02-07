@@ -5,7 +5,7 @@ WITH file_io_info
 AS
 (
 	SELECT
-		ROW_NUMBER() OVER (PARTITION BY database_name, file_id ORDER BY measure_date_local ASC) AS No,
+		ROW_NUMBER() OVER (PARTITION BY database_name, file_id,server_name ORDER BY measure_date_local ASC) AS No,
 		*
 	FROM
 		file_io
