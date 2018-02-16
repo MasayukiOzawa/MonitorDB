@@ -1,4 +1,4 @@
-﻿DECLARE @offset int = 540;		-- localtime 用オフセット (JST)
+DECLARE @offset int = 540;		-- localtime 用オフセット (JST)
 DECLARE @range int = -6;		-- 直近 6 時間のデータを取得
 
 WITH wait_info_time
@@ -49,7 +49,6 @@ AS
 		server_name,
 		wait_type
 )
-
 SELECT
 	*
 FROM(
@@ -57,7 +56,10 @@ FROM(
 		T1.measure_date_local,
 		T1.server_name,
 		T1.wait_type,
-		COALESCE(T1.total_wait_time_ms - T2.total_wait_time_ms, 0) AS measure_total_wait_time_ms
+		CASE 
+			WHEN COALESCE(T1.total_wait_time_ms - T2.total_wait_time_ms, 0) = 0 THEN 0 
+			ELSE COALESCE(T1.total_wait_time_ms - T2.total_wait_time_ms, 0) / COALESCE(DATEDIFF(ss, T2.measure_date_local, T1.measure_date_local), 0) 
+		END AS measure_total_wait_time_ms
 	FROM 
 		wait_info_time AS T1 WITH (NOLOCK)
 		LEFT JOIN
@@ -74,4 +76,3 @@ PIVOT(
 	FOR wait_type IN([CXPACKET], [CXCONSUMER], [SOS_SCHEDULER_YIELD], [RESOURCE_GOVERNOR_IDLE], [IO_QUEUE_LIMIT],[LOG_RATE_GOVERNOR], [THREADPOOL], 
 	[PAGE I/O LATCH], [WRITELOG], [PAGE LATCH (non-I/O)], [LATCH (non-buffer)], [LOCKS], [ASYNC_NETWORK_IO])
 ) AS PVT
-
