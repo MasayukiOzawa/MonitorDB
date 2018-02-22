@@ -63,6 +63,9 @@ $cmd = $con.CreateCommand()
 $cmd.CommandType = [System.Data.CommandType]::Text
 $cmd.CommandText = @"
 /*
+-- ****************************************
+-- ** Performance Counters
+-- ****************************************
 Interpreting the counter values from sys.dm_os_performance_counters
 https://blogs.msdn.microsoft.com/psssql/2013/09/23/interpreting-the-counter-values-from-sys-dm_os_performance_counters/
 
@@ -72,7 +75,7 @@ https://msdn.microsoft.com/en-us/library/cc238313.aspx
 -- PERF_COUNTER_LARGE_RAWCOUNT / PERF_COUNTER_COUNTER / PERF_COUNTER_BULK_COUNT
 SELECT
         @@SERVERNAME AS server_name,
-	DB_NAME() AS db_name,
+	    DB_NAME() AS db_name,
         RTRIM(SUBSTRING(object_name, PATINDEX('%:%', object_name) + 1, 256)) AS object_name,
         RTRIM(counter_name) AS counter_name,
         CASE
@@ -90,7 +93,7 @@ WHERE
 -- PERF_LARGE_RAW_FRACTION
 SELECT
         @@SERVERNAME AS server_name,
-	DB_NAME() AS db_name,
+	    DB_NAME() AS db_name,
         RTRIM(SUBSTRING(T1.object_name, PATINDEX('%:%', T1.object_name) + 1, 256)) AS object_name,
         RTRIM(T1.counter_name) AS counter_name,
         CASE
@@ -125,7 +128,7 @@ WHERE
 -- PERF_AVERAGE_BULK
 SELECT
         @@SERVERNAME AS server_name,
-	DB_NAME() AS db_name,
+	    DB_NAME() AS db_name,
         RTRIM(SUBSTRING(T1.object_name, PATINDEX('%:%', T1.object_name) + 1, 256)) AS object_name,
         RTRIM(T1.counter_name) AS counter_name,
         CASE
@@ -157,6 +160,53 @@ WHERE
         T1.cntr_type = 1073874176
         AND
         T2.cntr_value IS NOT NULL
+
+-- ****************************************
+-- ** Session / Connection / Worker
+-- ****************************************
+SELECT
+    @@SERVERNAME AS server_name,
+	DB_NAME() AS db_name,
+	(SELECT COUNT_BIG(*) FROM sys.dm_exec_sessions) AS total_sessions,
+	(SELECT COUNT_BIG(*) FROM sys.dm_exec_connections) AS total_connections,
+	(SELECT COUNT_BIG(*) FROM sys.dm_os_workers) AS total_workers,
+	(SELECT COUNT_BIG(*) FROM sys.dm_os_tasks) AS total_tasks,
+	(SELECT MAX(task) AS max_parallel
+		FROM
+		(
+			SELECT session_id, request_id, COUNT(*) AS task 
+			FROM sys.dm_os_tasks
+			WHERE
+			session_id IS NOT NULL
+			GROUP BY session_id, request_id
+		) AS T
+	 ) AS max_parallel
+
+
+-- ****************************************
+-- ** File I/O
+-- ****************************************
+SELECT
+    @@SERVERNAME AS server_name,
+	DB_NAME() AS db_name,
+	DB_NAME(database_id) AS database_name,
+	file_id,
+	num_of_reads,
+	num_of_bytes_read,
+	io_stall_read_ms,
+	io_stall_queued_read_ms,
+	num_of_writes,
+	num_of_bytes_written,
+	io_stall_write_ms,
+	io_stall_queued_write_ms,
+	io_stall,
+	size_on_disk_bytes
+FROM
+	sys.dm_io_virtual_file_stats(NULL, NULL)
+WHERE 
+	DB_NAME(database_id) IS NOT NULL
+	AND
+	database_id NOT IN(1,3,4)
 
 "@
 
@@ -193,26 +243,84 @@ Post-LogAnalyticsData -customerId $customerId -sharedKey $sharedKey -body ([Syst
 
 #>
 
+
+###########################################################
+# Performance Counters
+###########################################################
 $ArrayList  = New-Object System.Collections.ArrayList
 
 foreach ($row in $ds.Tables[0..2].Rows){
     $ArrayList.Add(
         [PSCustomObject]@{
-        "Computer" = "$($row.server_name)"
-        "db_name" =  "$($row.db_name)"
-        "object_name" = "$($row.object_name)"
-        "counter_name" = "$($row.counter_name)"
-        "instance_name" = "$($row.instance_name)"
-        "cntr_value" = $row.cntr_value
-        "cntr_value_base" = $row.cntr_value_base
-        "cntr_type" = $row.cntr_type
-
+            "Computer" = "$($row.server_name)"
+            "db_name" =  "$($row.db_name)"
+            "object_name" = "$($row.object_name)"
+            "counter_name" = "$($row.counter_name)"
+            "instance_name" = "$($row.instance_name)"
+            "cntr_value" = $row.cntr_value
+            "cntr_value_base" = $row.cntr_value_base
+            "cntr_type" = $row.cntr_type
         }
     ) | Out-Null
 }
 $json = $ArrayList | ConvertTo-Json
 
 $LogType = "SQLPerformance_Perf"
+Post-LogAnalyticsData -customerId $customerId -sharedKey $sharedKey -body ([System.Text.Encoding]::UTF8.GetBytes($json)) -logType $logType
+
+
+###########################################################
+# Session / Connection / Worker
+###########################################################
+$ArrayList  = New-Object System.Collections.ArrayList
+
+foreach ($row in $ds.Tables[3].Rows){
+    $ArrayList.Add(
+        [PSCustomObject]@{
+            "Computer" = "$($row.server_name)"
+            "db_name" =  "$($row.db_name)"
+            "total_sessions" = $row.total_sessions
+            "total_connections" = $row.total_connections
+            "total_workers" = $row.total_workers
+            "total_tasks" = $row.total_tasks
+            "max_parallel" = $row.max_parallel
+        }
+    ) | Out-Null
+}
+$json = $ArrayList | ConvertTo-Json
+
+$LogType = "SQLPerformance_Session"
+Post-LogAnalyticsData -customerId $customerId -sharedKey $sharedKey -body ([System.Text.Encoding]::UTF8.GetBytes($json)) -logType $logType
+
+
+###########################################################
+# Session / Connection / Worker
+###########################################################
+$ArrayList  = New-Object System.Collections.ArrayList
+
+foreach ($row in $ds.Tables[4].Rows){
+    $ArrayList.Add(
+        [PSCustomObject]@{
+            "Computer" = "$($row.server_name)"
+            "db_name" =  "$($row.db_name)"
+            "database_name" =  "$($row.database_name)"
+            "file_id" = $row.file_id
+            "num_of_reads" = $row.num_of_reads
+            "num_of_bytes_read" = $row.num_of_bytes_read
+            "io_stall_read_ms" = $row.io_stall_read_ms
+            "io_stall_queued_read_ms" = $row.io_stall_queued_read_ms
+            "num_of_writes" = $row.num_of_writes
+            "num_of_bytes_written" = $row.num_of_bytes_written
+            "io_stall_write_ms" = $row.io_stall_write_ms
+            "io_stall_queued_write_ms" = $row.io_stall_queued_write_ms
+            "io_stall" = $row.io_stall
+            "size_on_disk_bytes" = $row.size_on_disk_bytes
+        } 
+    ) | Out-Null
+}
+$json = $ArrayList | ConvertTo-Json
+
+$LogType = "SQLPerformance_FileIO"
 Post-LogAnalyticsData -customerId $customerId -sharedKey $sharedKey -body ([System.Text.Encoding]::UTF8.GetBytes($json)) -logType $logType
 
 $ds.Dispose()
