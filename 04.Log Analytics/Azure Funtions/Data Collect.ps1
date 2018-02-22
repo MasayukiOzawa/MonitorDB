@@ -3,7 +3,7 @@
 Param(
     $CustomerId = $ENV:WorkspaceID,　　　# Replace with your Workspace ID
     $SharedKey = $ENV:SharedKey,    # Replace with your Primary Key
-    $ConnectionString = $ENV:SQLAZURECONNSTR_DestinationDB
+    $ConnectionString = $ENV:SQLAZURECONNSTR_CollectTarget
 )
 
 # Create the function to create the authorization signature
@@ -208,6 +208,61 @@ WHERE
 	AND
 	database_id NOT IN(1,3,4)
 
+-- ****************************************
+-- ** Scheduler
+-- ****************************************
+SELECT 
+    @@SERVERNAME AS server_name,
+	DB_NAME() AS db_name,
+	scheduler_address,
+	parent_node_id,
+	scheduler_id,
+	cpu_id,
+	status,
+	is_online,
+	is_idle,
+	preemptive_switches_count,
+	context_switches_count,
+	idle_switches_count,
+	current_tasks_count,
+	runnable_tasks_count,
+	current_workers_count,
+	active_workers_count,
+	work_queue_count,
+	pending_disk_io_count,
+	load_factor,
+	yield_count,
+	last_timer_activity,
+	failed_to_create_worker,
+	active_worker_address,
+	memory_object_address,
+	task_memory_object_address,
+	quantum_length_us,
+	total_cpu_usage_ms,
+	total_cpu_idle_capped_ms,
+	total_scheduler_delay_ms
+FROM 
+	sys.dm_os_schedulers
+WHERE
+	is_online = 1
+	AND
+	scheduler_id < 1048576
+
+-- ****************************************
+-- ** Wait Stats
+-- ****************************************
+SELECT 
+	@@SERVERNAME AS server_name,
+	DB_NAME() AS db_name,
+	wait_type,
+	waiting_tasks_count,
+	wait_time_ms,
+	max_wait_time_ms,
+	signal_wait_time_ms
+FROM 
+	sys.dm_os_wait_stats
+WHERE
+	waiting_tasks_count > 0
 "@
 
 $adapter = New-Object System.Data.SqlClient.SqlDataAdapter -ArgumentList $cmd
@@ -217,31 +272,6 @@ $adapter.Fill($ds) | Out-Null
 
 $Con.Close()
 $con.Dispose()
-
-<#
-$ArrayList  = New-Object System.Collections.ArrayList
-
-foreach ($row in $ds.Tables[0].Rows){
-    $ArrayList.Add(
-       [PSCustomObject]@{
-        "Computer" = "$($row.server_name)"
-        "db_name" =  "$($row.db_name)"
-        "wait_type" = "$($row.wait_type)"
-        "waiting_tasks_count" = $row.waiting_tasks_count
-        "wait_time_ms" = $row.wait_time_ms
-        "max_wait_time_ms" = $row.max_wait_time_ms
-        "signal_wait_time_ms" = $row.signal_wait_time_ms
-        }
-    ) | Out-Null
-}
-
-
-$json = $ArrayList | ConvertTo-Json
-
-$LogType = "SQLPerformance_Wait"
-Post-LogAnalyticsData -customerId $customerId -sharedKey $sharedKey -body ([System.Text.Encoding]::UTF8.GetBytes($json)) -logType $logType
-
-#>
 
 
 ###########################################################
@@ -321,6 +351,75 @@ foreach ($row in $ds.Tables[4].Rows){
 $json = $ArrayList | ConvertTo-Json
 
 $LogType = "SQLPerformance_FileIO"
+Post-LogAnalyticsData -customerId $customerId -sharedKey $sharedKey -body ([System.Text.Encoding]::UTF8.GetBytes($json)) -logType $logType
+
+
+###########################################################
+# Scheduler
+###########################################################
+$ArrayList  = New-Object System.Collections.ArrayList
+
+foreach ($row in $ds.Tables[5].Rows){
+    $ArrayList.Add(
+        [PSCustomObject]@{
+            "Computer" = "$($row.server_name)"
+            "db_name" =  "$($row.db_name)"
+            "scheduler_address" =  "$($row.scheduler_address)"
+            "parent_node_id" = $row.parent_node_id
+            "scheduler_id" = $row.scheduler_id
+            "cpu_id" = $row.cpu_id
+            "status" = "$($row.status)"
+            "is_online" = $row.is_online
+            "is_idle" = $row.is_idle
+            "preemptive_switches_count" = $row.preemptive_switches_count
+            "context_switches_count" = $row.context_switches_count
+            "idle_switches_count" = $row.idle_switches_count
+            "current_tasks_count" = $row.current_tasks_count
+            "runnable_tasks_count" = $row.runnable_tasks_count
+            "current_workers_count" = $row.current_workers_count
+            "active_workers_count" = $row.active_workers_count
+            "work_queue_count" = $row.work_queue_count
+            "pending_disk_io_count" = $row.pending_disk_io_count
+            "load_factor" = $row.load_factor
+            "yield_count" = $row.yield_count
+            "last_timer_activity" = $row.last_timer_activity
+            "failed_to_create_worker" = $row.failed_to_create_worker
+            "active_worker_address" = $($row.active_worker_address)
+            "memory_object_address" = $($row.memory_object_address)
+            "task_memory_object_address" = $($row.task_memory_object_address)
+            "quantum_length_us" = $row.quantum_length_us
+            "total_cpu_usage_ms" = $row.total_cpu_usage_ms
+            "total_cpu_idle_capped_ms" = $row.total_cpu_idle_capped_ms
+            "total_scheduler_delay_ms" = $row.total_scheduler_delay_ms
+        } 
+    ) | Out-Null
+}
+$json = $ArrayList | ConvertTo-Json
+
+$LogType = "SQLPerformance_Scheduler"
+Post-LogAnalyticsData -customerId $customerId -sharedKey $sharedKey -body ([System.Text.Encoding]::UTF8.GetBytes($json)) -logType $logType
+
+###########################################################
+# Wait Stats
+###########################################################
+$ArrayList  = New-Object System.Collections.ArrayList
+
+foreach ($row in $ds.Tables[6].Rows){
+    $ArrayList.Add(
+        [PSCustomObject]@{
+            "Computer" = "$($row.server_name)"
+            "db_name" =  "$($row.db_name)"
+            "wait_type" =  "$($row.wait_type)"
+            "waiting_tasks_count" = $row.waiting_tasks_count
+            "wait_time_ms" = $row.wait_time_ms
+            "max_wait_time_ms" = $row.max_wait_time_ms
+            "signal_wait_time_ms" = $row.signal_wait_time_ms
+        } 
+    ) | Out-Null
+}
+$json = $ArrayList | ConvertTo-Json
+
+$LogType = "SQLPerformance_WaitStats"
 Post-LogAnalyticsData -customerId $customerId -sharedKey $sharedKey -body ([System.Text.Encoding]::UTF8.GetBytes($json)) -logType $logType
 
 $ds.Dispose()
