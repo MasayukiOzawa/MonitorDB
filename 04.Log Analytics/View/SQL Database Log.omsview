@@ -53,77 +53,8 @@
                                 "Version": 0,
                                 "Configuration": {
                                     "General": {
-                                        "title": "Performance",
+                                        "title": "Resource Usage",
                                         "newGroup": true,
-                                        "icon": "",
-                                        "useIcon": false
-                                    },
-                                    "Header": {
-                                        "Title": "Batch Request sec",
-                                        "Subtitle": ""
-                                    },
-                                    "LineChart": {
-                                        "Query": "SQLPerformance_Perf_CL | where counter_name_s == \"Batch Requests/sec\" | where true == true | sort by db_name_s, TimeGenerated asc nulls last | serialize | extend TimeGenerated_prev = prev(TimeGenerated,1) | extend cntr_value_d_prev = prev(cntr_value_d, 1, 0) | project Computer, TimeGenerated ,db_name_s, cntr_value =  (cntr_value_d - cntr_value_d_prev) / (datetime_diff('Second',TimeGenerated, TimeGenerated_prev )) | project Computer, TimeGenerated ,db_name_s, cntr_value = iif(cntr_value < 0, 0, tolong(cntr_value)) | summarize avg(cntr_value) by Computer, db_name_s, bin(TimeGenerated, 10min) | project TimeGenerated,Computer, db_name_s, avg_cntr_value",
-                                        "yAxis": {
-                                            "isLogarithmic": false,
-                                            "units": {
-                                                "baseUnitType": "",
-                                                "baseUnit": "",
-                                                "displayUnit": ""
-                                            },
-                                            "customLabel": "Request / sec"
-                                        },
-                                        "NavigationSelect": {}
-                                    },
-                                    "List": {
-                                        "Query": "SQLPerformance_Perf_CL | where counter_name_s == \"Batch Requests/sec\" | where true == true | sort by db_name_s, TimeGenerated asc nulls last | serialize | extend TimeGenerated_prev = prev(TimeGenerated,1) | extend cntr_value_d_prev = prev(cntr_value_d, 1, 0) | project Computer, TimeGenerated ,db_name_s, cntr_value =  (cntr_value_d - cntr_value_d_prev) / (datetime_diff('Second',TimeGenerated, TimeGenerated_prev )) | project Computer, TimeGenerated ,db_name_s, cntr_value = iif(cntr_value < 0, 0, tolong(cntr_value)) | summarize avg(cntr_value) by Computer, db_name_s, bin(TimeGenerated, 10min)",
-                                        "HideGraph": false,
-                                        "enableSparklines": true,
-                                        "operation": "Last Sample",
-                                        "ColumnsTitle": {
-                                            "Name": "Computer",
-                                            "Value": "Batch Request"
-                                        },
-                                        "Color": "#0072c6",
-                                        "thresholds": {
-                                            "isEnabled": false,
-                                            "values": [
-                                                {
-                                                    "name": "標準",
-                                                    "threshold": "既定",
-                                                    "color": "#009e49",
-                                                    "isDefault": true
-                                                },
-                                                {
-                                                    "name": "警告",
-                                                    "threshold": "60",
-                                                    "color": "#fcd116",
-                                                    "isDefault": false
-                                                },
-                                                {
-                                                    "name": "エラー",
-                                                    "threshold": "90",
-                                                    "color": "#ba141a",
-                                                    "isDefault": false
-                                                }
-                                            ]
-                                        },
-                                        "NameDSVSeparator": "",
-                                        "NavigationQuery": "search {selected item} | sort by TimeGenerated desc",
-                                        "NavigationSelect": {
-                                            "NavigationQuery": "search {selected item} | sort by TimeGenerated desc"
-                                        }
-                                    }
-                                }
-                            },
-                            {
-                                "Id": "LineChartBuilderBlade",
-                                "Type": "Blade",
-                                "Version": 0,
-                                "Configuration": {
-                                    "General": {
-                                        "title": "",
-                                        "newGroup": false,
                                         "icon": "",
                                         "useIcon": false
                                     },
@@ -132,7 +63,7 @@
                                         "Subtitle": ""
                                     },
                                     "LineChart": {
-                                        "Query": "SQLPerformance_Perf_CL | where object_name_s == \"Workload Group Stats\" and counter_name_s == \"CPU usage %\" | summarize avg(cntr_value_d) by Computer, db_name_s, instance_name_s , bin(TimeGenerated, 10min)",
+                                        "Query": "SQLPerformance_Session_CL | where ${Computer} | where ${Database} | summarize  avg(total_sessions_d), avg(total_connections_d), avg(total_workers_d)  by Computer, db_name_s,  bin(TimeGenerated, 10min)",
                                         "yAxis": {
                                             "isLogarithmic": false,
                                             "units": {
@@ -145,7 +76,7 @@
                                         "NavigationSelect": {}
                                     },
                                     "List": {
-                                        "Query": "SQLPerformance_Perf_CL | where object_name_s == \"Workload Group Stats\" and counter_name_s == \"CPU usage %\" | summarize avg(cntr_value_d) by Computer, db_name_s, instance_name_s , bin(TimeGenerated, 10min)",
+                                        "Query": "SQLPerformance_Perf_CL | where ${Computer} | where ${Database} | where object_name_s == \"Workload Group Stats\" and counter_name_s == \"CPU usage %\" | summarize avg(cntr_value_d) by Computer, db_name_s, instance_name_s , bin(TimeGenerated, 10min)",
                                         "HideGraph": false,
                                         "enableSparklines": true,
                                         "operation": "Last Sample",
@@ -186,82 +117,12 @@
                                 }
                             },
                             {
-                                "Id": "LineChartCalloutStackedBuilderBlade",
-                                "Type": "Blade",
-                                "Version": 0,
-                                "Configuration": {
-                                    "General": {
-                                        "title": "Cache Hit",
-                                        "newGroup": true
-                                    },
-                                    "charts": [
-                                        {
-                                            "Header": {
-                                                "Title": "Page life expectancy",
-                                                "Subtitle": ""
-                                            },
-                                            "LineChart": {
-                                                "Query": "SQLPerformance_Perf_CL | where counter_name_s == \"Page life expectancy\" and object_name_s == \"Buffer Manager\" | summarize max(cntr_value_d) by Computer, db_name_s, bin(TimeGenerated, 10min)  | sort by TimeGenerated asc",
-                                                "yAxis": {
-                                                    "isLogarithmic": false,
-                                                    "units": {
-                                                        "baseUnitType": "",
-                                                        "baseUnit": "",
-                                                        "displayUnit": ""
-                                                    },
-                                                    "customLabel": "sec"
-                                                },
-                                                "NavigationSelect": {}
-                                            }
-                                        },
-                                        {
-                                            "Header": {
-                                                "Title": "Buffer Cache Hit",
-                                                "Subtitle": ""
-                                            },
-                                            "LineChart": {
-                                                "Query": "SQLPerformance_Perf_CL | where counter_name_s == \"Buffer cache hit ratio\" | summarize avg(cntr_value_d) by Computer, db_name_s, bin(TimeGenerated, 10min) | sort by TimeGenerated asc",
-                                                "yAxis": {
-                                                    "isLogarithmic": false,
-                                                    "units": {
-                                                        "baseUnitType": "",
-                                                        "baseUnit": "",
-                                                        "displayUnit": ""
-                                                    },
-                                                    "customLabel": "Cache Hit %"
-                                                },
-                                                "NavigationSelect": {}
-                                            }
-                                        },
-                                        {
-                                            "Header": {
-                                                "Title": "Plan Cache",
-                                                "Subtitle": ""
-                                            },
-                                            "LineChart": {
-                                                "Query": "SQLPerformance_Perf_CL  | where counter_name_s == \"Cache Hit Ratio\" and instance_name_s in (\"SQL Plans\", \"Object Plans\") | summarize avg(cntr_value_d) by Computer, db_name_s,instance_name_s, bin(TimeGenerated, 10min)  | sort by TimeGenerated, instance_name_s asc",
-                                                "yAxis": {
-                                                    "isLogarithmic": false,
-                                                    "units": {
-                                                        "baseUnitType": "",
-                                                        "baseUnit": "",
-                                                        "displayUnit": ""
-                                                    },
-                                                    "customLabel": "Cache Hit %"
-                                                },
-                                                "NavigationSelect": {}
-                                            }
-                                        }
-                                    ]
-                                }
-                            },
-                            {
                                 "Id": "SingleQueryDonutBuilderBladeV1",
                                 "Type": "Blade",
                                 "Version": 0,
                                 "Configuration": {
                                     "General": {
-                                        "title": "Memory Usage",
+                                        "title": "",
                                         "newGroup": false,
                                         "icon": "",
                                         "useIcon": false
@@ -271,7 +132,7 @@
                                         "Subtitle": ""
                                     },
                                     "Donut": {
-                                        "Query": "SQLPerformance_Perf_CL  | where counter_name_s in(\"Database Cache Memory (KB)\", \"SQL Cache Memory (KB)\", \"Lock Memory (KB)\", \"Stolen Server Memory (KB)\" , \"Reserved Server Memory (KB)\", \"Log Pool Memory (KB)\", \"Lock Memory (KB)\", \"Free Memory (KB)\") and object_name_s == \"Memory Manager\" | summarize  avg(cntr_value_d) by counter_name_s | sort by avg_cntr_value_d ",
+                                        "Query": "SQLPerformance_Perf_CL | where ${Computer | where ${Database} | where counter_name_s in(\"Database Cache Memory (KB)\", \"SQL Cache Memory (KB)\", \"Lock Memory (KB)\", \"Stolen Server Memory (KB)\" , \"Reserved Server Memory (KB)\", \"Log Pool Memory (KB)\", \"Lock Memory (KB)\", \"Free Memory (KB)\") and object_name_s == \"Memory Manager\" | summarize  avg(cntr_value_d) by counter_name_s | sort by avg_cntr_value_d",
                                         "CenterLegend": {
                                             "Text": "合計",
                                             "Operation": "Sum",
@@ -288,7 +149,7 @@
                                         "NavigationSelect": {}
                                     },
                                     "List": {
-                                        "Query": "SQLPerformance_Perf_CL  | where counter_name_s in(\"Database Cache Memory (KB)\", \"SQL Cache Memory (KB)\", \"Lock Memory (KB)\", \"Stolen Server Memory (KB)\" , \"Reserved Server Memory (KB)\", \"Log Pool Memory (KB)\", \"Lock Memory (KB)\", \"Free Memory (KB)\", \"Total Server Memory (KB)\", \"Target Server Memory (KB)\") and object_name_s == \"Memory Manager\" | summarize  avg(cntr_value_d) by Computer, db_name_s, counter_name_s, bin(TimeGenerated, 10min) | sort by avg_cntr_value_d ",
+                                        "Query": "SQLPerformance_Perf_CL | where ${Computer} | where ${Database} | where counter_name_s in(\"Database Cache Memory (KB)\", \"SQL Cache Memory (KB)\", \"Lock Memory (KB)\", \"Stolen Server Memory (KB)\" , \"Reserved Server Memory (KB)\", \"Log Pool Memory (KB)\", \"Lock Memory (KB)\", \"Free Memory (KB)\", \"Total Server Memory (KB)\", \"Target Server Memory (KB)\") and object_name_s == \"Memory Manager\" | summarize  avg(cntr_value_d) by Computer, db_name_s, counter_name_s, bin(TimeGenerated, 10min) | sort by avg_cntr_value_d",
                                         "HideGraph": false,
                                         "enableSparklines": true,
                                         "operation": "Last Sample",
@@ -334,8 +195,216 @@
                                 "Version": 0,
                                 "Configuration": {
                                     "General": {
-                                        "title": "Session / Connection / Worker",
+                                        "title": "Data Access",
                                         "newGroup": true
+                                    },
+                                    "charts": [
+                                        {
+                                            "Header": {
+                                                "Title": "Page life expectancy",
+                                                "Subtitle": ""
+                                            },
+                                            "LineChart": {
+                                                "Query": "SQLPerformance_Perf_CL | where ${Computer} | where ${Database} | where counter_name_s == \"Page life expectancy\" and object_name_s == \"Buffer Manager\" | summarize max(cntr_value_d) by Computer, db_name_s, bin(TimeGenerated, 10min) | sort by TimeGenerated asc",
+                                                "yAxis": {
+                                                    "isLogarithmic": false,
+                                                    "units": {
+                                                        "baseUnitType": "",
+                                                        "baseUnit": "",
+                                                        "displayUnit": ""
+                                                    },
+                                                    "customLabel": "sec"
+                                                },
+                                                "NavigationSelect": {}
+                                            }
+                                        },
+                                        {
+                                            "Header": {
+                                                "Title": "Buffer Cache Hit",
+                                                "Subtitle": ""
+                                            },
+                                            "LineChart": {
+                                                "Query": "SQLPerformance_Perf_CL | where ${Computer} | where ${Database} | where counter_name_s == \"Buffer cache hit ratio\" | summarize avg(cntr_value_d) by Computer, db_name_s, bin(TimeGenerated, 10min) | sort by TimeGenerated asc",
+                                                "yAxis": {
+                                                    "isLogarithmic": false,
+                                                    "units": {
+                                                        "baseUnitType": "",
+                                                        "baseUnit": "",
+                                                        "displayUnit": ""
+                                                    },
+                                                    "customLabel": "Cache Hit %"
+                                                },
+                                                "NavigationSelect": {}
+                                            }
+                                        },
+                                        {
+                                            "Header": {
+                                                "Title": "Plan Cache",
+                                                "Subtitle": ""
+                                            },
+                                            "LineChart": {
+                                                "Query": "SQLPerformance_Perf_CL | where ${Computer} | where ${Database} | where counter_name_s == \"Cache Hit Ratio\" and instance_name_s in (\"SQL Plans\", \"Object Plans\") | summarize avg(cntr_value_d) by Computer, db_name_s,instance_name_s, bin(TimeGenerated, 10min) | sort by TimeGenerated, instance_name_s asc",
+                                                "yAxis": {
+                                                    "isLogarithmic": false,
+                                                    "units": {
+                                                        "baseUnitType": "",
+                                                        "baseUnit": "",
+                                                        "displayUnit": ""
+                                                    },
+                                                    "customLabel": "Cache Hit %"
+                                                },
+                                                "NavigationSelect": {}
+                                            }
+                                        }
+                                    ]
+                                }
+                            },
+                            {
+                                "Id": "LineChartBuilderBlade",
+                                "Type": "Blade",
+                                "Version": 0,
+                                "Configuration": {
+                                    "General": {
+                                        "title": "",
+                                        "newGroup": false,
+                                        "icon": "",
+                                        "useIcon": false
+                                    },
+                                    "Header": {
+                                        "Title": "Access",
+                                        "Subtitle": ""
+                                    },
+                                    "LineChart": {
+                                        "Query": "SQLPerformance_Perf_CL | where ${Computer} | where ${Database} | where object_name_s == \"Buffer Manager\" and counter_name_s in(\"Readahead pages/sec\", \"Page reads/sec\", \"Page writes/sec\", \"Checkpoint pages/sec\") | summarize avg(cntr_value_d) * 8 / 1024 by Computer, counter_name_s, bin(TimeGenerated, 10min)",
+                                        "yAxis": {
+                                            "isLogarithmic": false,
+                                            "units": {
+                                                "baseUnitType": "",
+                                                "baseUnit": "",
+                                                "displayUnit": ""
+                                            },
+                                            "customLabel": "MB/sec"
+                                        },
+                                        "NavigationSelect": {}
+                                    },
+                                    "List": {
+                                        "Query": "SQLPerformance_Perf_CL | where ${Computer} | where ${Database} | where object_name_s == \"Buffer Manager\" and counter_name_s in(\"Readahead pages/sec\", \"Page reads/sec\", \"Page writes/sec\", \"Checkpoint pages/sec\") | summarize avg(cntr_value_d) * 8 / 1024 by Computer, counter_name_s, bin(TimeGenerated, 10min)",
+                                        "HideGraph": false,
+                                        "enableSparklines": true,
+                                        "operation": "Average",
+                                        "ColumnsTitle": {
+                                            "Name": "Computer",
+                                            "Value": "MB/sec"
+                                        },
+                                        "Color": "#0072c6",
+                                        "thresholds": {
+                                            "isEnabled": false,
+                                            "values": [
+                                                {
+                                                    "name": "標準",
+                                                    "threshold": "既定",
+                                                    "color": "#009e49",
+                                                    "isDefault": true
+                                                },
+                                                {
+                                                    "name": "警告",
+                                                    "threshold": "60",
+                                                    "color": "#fcd116",
+                                                    "isDefault": false
+                                                },
+                                                {
+                                                    "name": "エラー",
+                                                    "threshold": "90",
+                                                    "color": "#ba141a",
+                                                    "isDefault": false
+                                                }
+                                            ]
+                                        },
+                                        "NameDSVSeparator": "",
+                                        "NavigationQuery": "search {selected item} | sort by TimeGenerated desc",
+                                        "NavigationSelect": {
+                                            "NavigationQuery": "search {selected item} | sort by TimeGenerated desc"
+                                        }
+                                    }
+                                }
+                            },
+                            {
+                                "Id": "LineChartBuilderBlade",
+                                "Type": "Blade",
+                                "Version": 0,
+                                "Configuration": {
+                                    "General": {
+                                        "title": "Request",
+                                        "newGroup": true,
+                                        "icon": "",
+                                        "useIcon": false
+                                    },
+                                    "Header": {
+                                        "Title": "Batch Request sec",
+                                        "Subtitle": ""
+                                    },
+                                    "LineChart": {
+                                        "Query": "SQLPerformance_Perf_CL | where ${Computer} | where ${Database} | where counter_name_s == \"Batch Requests/sec\" | where true == true | sort by db_name_s, TimeGenerated asc nulls last | serialize | extend TimeGenerated_prev = prev(TimeGenerated,1), cntr_value_d_prev = prev(cntr_value_d, 1, 0) | project Computer, TimeGenerated ,db_name_s, cntr_value =  (cntr_value_d - cntr_value_d_prev) / (datetime_diff('Second',TimeGenerated, TimeGenerated_prev )) | summarize avg(cntr_value) by Computer, db_name_s, bin(TimeGenerated, 10min)",
+                                        "yAxis": {
+                                            "isLogarithmic": false,
+                                            "units": {
+                                                "baseUnitType": "",
+                                                "baseUnit": "",
+                                                "displayUnit": ""
+                                            },
+                                            "customLabel": "Request / sec"
+                                        },
+                                        "NavigationSelect": {}
+                                    },
+                                    "List": {
+                                        "Query": "SQLPerformance_Perf_CL | where ${Computer} | where ${Database} | where counter_name_s == \"Batch Requests/sec\" | where true == true | sort by db_name_s, TimeGenerated asc nulls last | serialize | extend TimeGenerated_prev = prev(TimeGenerated,1), cntr_value_d_prev = prev(cntr_value_d, 1, 0) | project Computer, TimeGenerated ,db_name_s, cntr_value =  (cntr_value_d - cntr_value_d_prev) / (datetime_diff('Second',TimeGenerated, TimeGenerated_prev )) | summarize avg(cntr_value) by Computer, db_name_s, bin(TimeGenerated, 10min)",
+                                        "HideGraph": false,
+                                        "enableSparklines": true,
+                                        "operation": "Last Sample",
+                                        "ColumnsTitle": {
+                                            "Name": "Computer",
+                                            "Value": "Batch Request"
+                                        },
+                                        "Color": "#0072c6",
+                                        "thresholds": {
+                                            "isEnabled": false,
+                                            "values": [
+                                                {
+                                                    "name": "標準",
+                                                    "threshold": "既定",
+                                                    "color": "#009e49",
+                                                    "isDefault": true
+                                                },
+                                                {
+                                                    "name": "警告",
+                                                    "threshold": "60",
+                                                    "color": "#fcd116",
+                                                    "isDefault": false
+                                                },
+                                                {
+                                                    "name": "エラー",
+                                                    "threshold": "90",
+                                                    "color": "#ba141a",
+                                                    "isDefault": false
+                                                }
+                                            ]
+                                        },
+                                        "NameDSVSeparator": "",
+                                        "NavigationQuery": "search {selected item} | sort by TimeGenerated desc",
+                                        "NavigationSelect": {
+                                            "NavigationQuery": "search {selected item} | sort by TimeGenerated desc"
+                                        }
+                                    }
+                                }
+                            },
+                            {
+                                "Id": "LineChartCalloutStackedBuilderBlade",
+                                "Type": "Blade",
+                                "Version": 0,
+                                "Configuration": {
+                                    "General": {
+                                        "title": "",
+                                        "newGroup": false
                                     },
                                     "charts": [
                                         {
@@ -344,7 +413,7 @@
                                                 "Subtitle": ""
                                             },
                                             "LineChart": {
-                                                "Query": "SQLPerformance_Session_CL  | summarize  avg(total_sessions_d), avg(total_connections_d), avg(total_workers_d)  by Computer, db_name_s,  bin(TimeGenerated, 10min)",
+                                                "Query": "SQLPerformance_Session_CL | where ${Computer} | where ${Database} | summarize  avg(total_sessions_d), avg(total_connections_d), avg(total_workers_d)  by Computer, db_name_s,  bin(TimeGenerated, 10min)",
                                                 "yAxis": {
                                                     "isLogarithmic": false,
                                                     "units": {
@@ -363,7 +432,7 @@
                                                 "Subtitle": ""
                                             },
                                             "LineChart": {
-                                                "Query": "SQLPerformance_Session_CL  | summarize  avg(total_tasks_d) by Computer, db_name_s, bin(TimeGenerated, 10min)",
+                                                "Query": "SQLPerformance_Session_CL | where ${Computer} | where ${Database} | summarize  avg(total_tasks_d) by Computer, db_name_s, bin(TimeGenerated, 10min)",
                                                 "yAxis": {
                                                     "isLogarithmic": false,
                                                     "units": {
@@ -382,7 +451,7 @@
                                                 "Subtitle": ""
                                             },
                                             "LineChart": {
-                                                "Query": "SQLPerformance_Session_CL  | summarize  max(max_parallel_d) by Computer, db_name_s, bin(TimeGenerated, 10min)",
+                                                "Query": "SQLPerformance_Session_CL | where ${Computer} | where ${Database} | summarize  max(max_parallel_d) by Computer, db_name_s, bin(TimeGenerated, 10min)",
                                                 "yAxis": {
                                                     "isLogarithmic": false,
                                                     "units": {
@@ -404,6 +473,11 @@
                                 "FieldName": "Computer",
                                 "QueryForValues": "SQLPerformance_Perf_CL | distinct Computer  | sort by Computer asc ",
                                 "Title": "Computer"
+                            },
+                            {
+                                "FieldName": "db_name_s",
+                                "QueryForValues": "SQLPerformance_Perf_CL | distinct db_name_s | order by db_name_s asc",
+                                "Title": "Database"
                             }
                         ],
                         "OverviewTile": {
